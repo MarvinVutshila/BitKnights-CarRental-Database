@@ -44,7 +44,7 @@ CONFIG = {
     "host": "localhost",           # local computer
     "port": 3306,                  # Default MySQL port
     "user": "root",                # Default local MySQL user
-    "password": "Marvin@04",       # <--- Your local MySQL password
+    "password": "",       # <--- Your local MySQL password
 }
 DB_NAME = os.getenv("DB_NAME", "bit_knights_car_rental")
 # ============================================================================
