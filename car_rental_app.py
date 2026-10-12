@@ -19,11 +19,12 @@ Connects Python to the MySQL database "bit_knights_car_rental" and
 Usage
 -----
     pip install -r requirements.txt
+    copy .env.example to .env and fill in your MySQL password
     python car_rental_app.py --setup     # first run: creates and fills the database
     python car_rental_app.py             # later runs: just executes the queries
 
-Connection details can be changed with the environment variables
-DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME.
+Connection details are read from the .env file (DB_HOST, DB_PORT, DB_USER,
+DB_PASSWORD, DB_NAME). If .env is missing, sensible defaults are used.
 """
 
 import os
@@ -34,17 +35,19 @@ from pathlib import Path
 
 import mysql.connector
 from mysql.connector import Error
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 # ============================================================================
-# CONFIGURATION - LOCAL MYSQL INSTANCE
+# CONFIGURATION - LOCAL MYSQL INSTANCE (values come from .env)
 # ============================================================================
 CONFIG = {
-    "host": "localhost",           # local computer
-    "port": 3306,                  # Default MySQL port
-    "user": "root",                # Default local MySQL user
-    "password": "",       # <--- Your local MySQL password
+    "host":     os.getenv("DB_HOST", "localhost"),
+    "port":     int(os.getenv("DB_PORT", 3306)),
+    "user":     os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", ""),
 }
 DB_NAME = os.getenv("DB_NAME", "bit_knights_car_rental")
 # ============================================================================

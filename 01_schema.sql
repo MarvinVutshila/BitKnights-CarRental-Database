@@ -3,7 +3,9 @@
   Course      : CSC312 Database Practical Assignment 2
   File        : 01_schema.sql
   Purpose     : Creates the Bit Knights Car Rental database (3NF) with all constraints.
-  Students    : [Student Number 1], [Student Number 2], [Student Number 3], [Student Number 4]
+  Students    : Ntlahla Kalalo (4497363), Vutshila Marvin Makhubela (4335742),
+                Constance Xoliwe Maluleke (4350565), Andisiwe Mankayi (4334941),
+                Mthokozisi Junior Nkalanga (4323080)
 */
 
 DROP DATABASE IF EXISTS bit_knights_car_rental;

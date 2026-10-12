@@ -52,13 +52,15 @@ ORDER BY Total_Bookings DESC, Customer_Name;
 SELECT b.Booking_ID,
        CONCAT(cu.First_Name, ' ', cu.Last_Name) AS Customer_Name,
        MONTHNAME(b.Pick_Up_Date)                AS Pick_Up_Month,
-       DATEDIFF(b.Return_Date, b.Pick_Up_Date)  AS Days_Booked,
+       GREATEST(DATEDIFF(b.Return_Date, b.Pick_Up_Date), 1) AS Days_Booked,
        COUNT(r.Rental_ID)                       AS Cars_On_Booking,
        SUM(r.Rental_Cost)                       AS Booking_Total
 FROM Booking b
 JOIN Customer cu ON cu.Customer_ID = b.Customer_ID
 JOIN Rental   r  ON r.Booking_ID   = b.Booking_ID
 WHERE b.Pick_Up_Date BETWEEN '2026-09-01' AND '2026-09-30'
+  AND b.Booking_Status <> 'Cancelled'
+  AND r.Rental_Status  <> 'Cancelled'
 GROUP BY b.Booking_ID, cu.First_Name, cu.Last_Name, b.Pick_Up_Date, b.Return_Date
 ORDER BY b.Pick_Up_Date;
 
@@ -73,6 +75,7 @@ JOIN Rental  r  ON r.Booking_ID  = b.Booking_ID
 JOIN Car     c  ON c.Car_ID      = r.Car_ID
 JOIN Company co ON co.Company_ID = c.Company_ID
 WHERE b.Booking_Status = 'Completed'
+  AND r.Rental_Status  = 'Returned'
 GROUP BY cu.Customer_ID, cu.First_Name, cu.Last_Name
 HAVING COUNT(DISTINCT b.Booking_ID) >= 2 AND SUM(r.Rental_Cost) > 4000
 ORDER BY Total_Spent DESC;
@@ -86,14 +89,14 @@ FROM Employee e
 JOIN Company co ON co.Company_ID  = e.Company_ID
 JOIN Booking b  ON b.Employee_ID  = e.Employee_ID
 JOIN Rental  r  ON r.Booking_ID   = b.Booking_ID
-WHERE r.Rental_Status <> 'Cancelled'
+WHERE r.Rental_Status IN ('Returned', 'Active')
 GROUP BY e.Employee_ID, e.Employee_First_Name, e.Employee_Last_Name, co.Company_Name
 HAVING SUM(r.Rental_Cost) > (
         SELECT AVG(emp_total)
         FROM (SELECT SUM(r2.Rental_Cost) AS emp_total
                 FROM Booking b2
                 JOIN Rental r2 ON r2.Booking_ID = b2.Booking_ID
-               WHERE r2.Rental_Status <> 'Cancelled'
+               WHERE r2.Rental_Status IN ('Returned', 'Active')
                GROUP BY b2.Employee_ID) AS per_employee)
 ORDER BY Revenue_Generated DESC;
 
@@ -104,11 +107,11 @@ FROM Car c
 JOIN Company co ON co.Company_ID = c.Company_ID
 WHERE c.Car_ID NOT IN (SELECT r.Car_ID
                          FROM Rental r
-                        WHERE r.Rental_Status IN ('Returned', 'Active'))
+                        WHERE r.Rental_Status IN ('Returned', 'Active', 'Reserved'))
    OR (c.Car_Status = 'Maintenance' AND c.Car_DailyRate > 900)
 ORDER BY co.Company_Name, c.Car_DailyRate DESC;
 
-### Q10 | Complex | Multi car bookings with the cars listed together (JOINs, GROUP_CONCAT, HAVING with OR)
+### Q10 | Complex | Multi car or high value bookings with the cars listed together (JOINs, GROUP_CONCAT, HAVING with OR)
 SELECT b.Booking_ID,
        CONCAT(cu.First_Name, ' ', cu.Last_Name)                       AS Customer_Name,
        CONCAT(e.Employee_First_Name, ' ', e.Employee_Last_Name)       AS Handled_By,
@@ -121,6 +124,7 @@ JOIN Customer cu ON cu.Customer_ID = b.Customer_ID
 JOIN Employee e  ON e.Employee_ID  = b.Employee_ID
 JOIN Rental   r  ON r.Booking_ID   = b.Booking_ID
 JOIN Car      c  ON c.Car_ID       = r.Car_ID
+WHERE r.Rental_Status <> 'Cancelled'
 GROUP BY b.Booking_ID, cu.First_Name, cu.Last_Name, e.Employee_First_Name, e.Employee_Last_Name
 HAVING COUNT(r.Rental_ID) > 1 OR SUM(r.Rental_Cost) > 5000
 ORDER BY Booking_Total DESC;
