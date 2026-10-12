@@ -1,5 +1,17 @@
+# Environment / secrets
 .env
+env.example
+
+# Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lecturer resources (keep local, don't push)
+CSC312*.pdf
+CSC312*.docx
